@@ -6,7 +6,6 @@ from .models import ToDo
 
 class TodoListCreate(generics.ListCreateAPIView):
     serializer_class = ToDoSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return ToDo.objects.filter(user = self.request.user).order_by('-created_at')
@@ -16,15 +15,13 @@ class TodoListCreate(generics.ListCreateAPIView):
 
 class ToDoRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ToDoSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return ToDo.objects.filter(user=self.request.user)
 
 class TodoToggleComplete(generics.UpdateAPIView):
     serializer_class = ToDoToggleCompleteSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
+    
     def get_queryset(self):
         return ToDo.objects.filter(user=self.request.user)
     

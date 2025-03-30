@@ -13,6 +13,8 @@ class ToDoSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         title = data.get('title').strip().lower()
 
+        if self.instance:
+            return data
         if ToDo.objects.filter(user=user, title__iexact=title).exists():
             raise serializers.ValidationError({"detail": "You already have a similar todo."})
         return data
