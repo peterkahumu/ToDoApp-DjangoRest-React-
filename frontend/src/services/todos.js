@@ -38,7 +38,7 @@ class TodoDataService {
 
     completeTodo(id, token) {
         this.setHeaders(token);
-        return apiClient.put(`/todos/complete/${id}`);
+        return apiClient.put(`/todos/complete/${id}/`);
     }
 
     login(data) {

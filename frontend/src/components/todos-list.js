@@ -11,19 +11,20 @@ import moment from 'moment';
 const TodosList = ({ token }) => {
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  // Fetch todos if token exists
   const retrieveTodos = useCallback(async () => {
     if (!token) return;
     setLoading(true);
-    setError("");
+    setErrorMessage("");
+    setSuccessMessage("");
 
     try {
       const response = await TodoDataService.getAll(token);
       setTodos(response.data);
     } catch (error) {
-      setError("Failed to fetch todos. Please try again.");
+      setErrorMessage("Failed to fetch todos. Please try again.");
       console.error("Error fetching todos:", error);
     } finally {
       setLoading(false);
@@ -34,19 +35,30 @@ const TodosList = ({ token }) => {
     retrieveTodos();
   }, [retrieveTodos]);
 
-  // Handle delete functionality
   const handleDelete = async (id) => {
-
     if (!window.confirm("Are you sure you want to delete this todo?")) return;
-    setError("");
+    setErrorMessage("");
+    setSuccessMessage("");
 
     try {
       await TodoDataService.deleteTodo(id, token);
       setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
-      setError("Todo deleted permanently.")
+      setSuccessMessage("Todo deleted successfully.");
     } catch (error) {
-      setError("Failed to delete the todo. Please try again.");
+      setErrorMessage("Failed to delete the todo. Please try again.");
       console.error("Error deleting todo:", error);
+    }
+  };
+
+  const toggleComplete = async (todo) => {
+    
+    try {
+      await TodoDataService.completeTodo(todo.id, token);
+      retrieveTodos();
+      setSuccessMessage(todo.completed ? "Todo marked as incomplete." : "Todo completed successfully.");
+    } catch (error) {
+      setErrorMessage("Could not update the todo status.");
+      console.error("Error updating todo status:", error);
     }
   };
 
@@ -54,27 +66,32 @@ const TodosList = ({ token }) => {
     <Container>
       {!token ? (
         <Alert variant="warning">
-          <b>You are not logged in.</b> Please{" "}
+          <b>You are not logged in.</b> Please {" "}
           <Link to="/login">log in</Link> to see your todos.
         </Alert>
       ) : (
         <>
           {loading && <Spinner animation="border" />}
-          {error && <Alert variant="danger">{error}</Alert>}
+          {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+          {successMessage && <Alert variant="success">{successMessage}</Alert>}
 
-          {!loading && !error && todos.length === 0 && (
+          {!loading && !errorMessage && todos.length === 0 && (
             <Alert variant="info">No todos available.</Alert>
           )}
+
           <div>
             <Link to={'/todos/create/'}>
               <Button variant="outline-info" className="mb-3">Add To-do</Button>
             </Link>
           </div>
+          
           {todos.map((todo) => (
-            <Card key={todo.id} className="mb-3" >
+            <Card key={todo.id} className={`mb-3 ${todo.completed ? 'bg-light text-muted' : ''}`}>
               <Card.Body>
                 <div>
-                  <Card.Title>{todo.title}</Card.Title>
+                  <Card.Title>
+                    {todo.completed ? "✅ " : ""}{todo.title}
+                  </Card.Title>
                   <Card.Text>
                     <b>Memo:</b> {todo.memo}
                   </Card.Text>
@@ -91,6 +108,12 @@ const TodosList = ({ token }) => {
                   onClick={() => handleDelete(todo.id)}
                 >
                   Delete
+                </Button>
+                <Button 
+                  variant={todo.completed ? "outline-secondary" : "outline-success"} 
+                  onClick={() => toggleComplete(todo)}
+                >
+                  {todo.completed ? "Mark as Incomplete" : "Complete"}
                 </Button>
               </Card.Body>
             </Card>
