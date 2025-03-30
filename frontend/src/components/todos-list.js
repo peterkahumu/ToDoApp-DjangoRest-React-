@@ -36,9 +36,14 @@ const TodosList = ({ token }) => {
 
   // Handle delete functionality
   const handleDelete = async (id) => {
+
+    if (!window.confirm("Are you sure you want to delete this todo?")) return;
+    setError("");
+
     try {
       await TodoDataService.deleteTodo(id, token);
       setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+      setError("Todo deleted permanently.")
     } catch (error) {
       setError("Failed to delete the todo. Please try again.");
       console.error("Error deleting todo:", error);
