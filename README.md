@@ -4,6 +4,10 @@
 
 This is a full-stack ToDo application with a React frontend and a Django Rest Framework (DRF) backend. The application allows users to create, update, delete, and manage tasks efficiently.
 
+## Video Showcasing
+
+[YouTube Video](https://youtu.be/7FSrWVs_GRs)
+
 ## Technologies Used
 
 ### Frontend
